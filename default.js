@@ -13,6 +13,7 @@ module.exports.run = (config) => {
     mqttClient.subscribe('psa/pizza');
     mqttClient.subscribe('psa/newMember');
     mqttClient.subscribe('psa/message');
+    mqttClient.subscribe('psa/nowPlaying');
     mqttClient.subscribe('sensor/door/bell');
     mqttClient.subscribe('sensor/space/member/present');
 
@@ -56,6 +57,12 @@ module.exports.run = (config) => {
             case 'psa/message':
                 if (message) {
                     ledBoard.sendScreens([screens.publicServiceAnnouncement(message), screens.idle(memberCount)]);
+                }
+                break;
+
+            case 'psa/nowPlaying':
+                if (message) {
+                    ledBoard.sendScreens([screens.nowPlaying(message), screens.idle(memberCount)]);
                 }
                 break;
         }
