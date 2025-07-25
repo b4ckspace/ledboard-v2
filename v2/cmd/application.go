@@ -65,7 +65,7 @@ func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, 
 			memberCount = count
 
 			// Only send idle screen if not in laser mode or laser is not active
-			if mode == DefaultMode || !laserActive {
+			if !laserActive || mode == DefaultMode {
 				ledBoardClient.SendScreen(screensManager.Idle(memberCount))
 			}
 
@@ -73,17 +73,13 @@ func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, 
 			ledBoardClient.SendScreens([]string{screensManager.PizzaTimer(), getIdleScreen()})
 
 		case "psa/donation":
-			if mode == DefaultMode { // Only handle in DefaultMode
-				ledBoardClient.SendScreens([]string{screensManager.Donation(), getIdleScreen()})
-			}
+			ledBoardClient.SendScreens([]string{screensManager.Donation(), getIdleScreen()})
 
 		case "psa/alarm":
 			ledBoardClient.SendScreens([]string{screensManager.Alarm(message), getIdleScreen()})
 
 		case "psa/newMember":
-			if mode == DefaultMode { // Only handle in DefaultMode
-				ledBoardClient.SendScreens([]string{screensManager.NewMemberRegistration(message), getIdleScreen()})
-			}
+			ledBoardClient.SendScreens([]string{screensManager.NewMemberRegistration(message), getIdleScreen()})
 
 		case "sensor/door/bell":
 			if message == "pressed" {
@@ -96,45 +92,41 @@ func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, 
 			}
 
 		case "psa/nowPlaying":
-			if mode == DefaultMode && message != "" { // Only handle in DefaultMode
+			if message != "" {
 				ledBoardClient.SendScreens([]string{screensManager.NowPlaying(message), getIdleScreen()})
 			}
 
-		// Laser-specific topics - only handled if in LasercutterMode
+		// Laser-specific topics - these cases will only be reached if subscribed
 		case "project/laser/operation":
-			if mode == LasercutterMode {
-				if message == "active" {
-					laserActive = true
+			if message == "active" {
+				laserActive = true
 
-					// Use the internal datetime to produce a counting screen!
-					nullDate := time.Date(2000, time.February, 0, 0, 0, 2, 0, time.UTC)
-					ledBoardClient.SetDate(nullDate)
+				// Use the internal datetime to produce a counting screen!
+				nullDate := time.Date(2000, time.February, 0, 0, 0, 2, 0, time.UTC)
+				ledBoardClient.SetDate(nullDate)
 
-					ledBoardClient.SendScreen(screensManager.LaserOperation())
-				} else {
-					laserActive = false
-				}
+				ledBoardClient.SendScreen(screensManager.LaserOperation())
+			} else {
+				laserActive = false
 			}
 
 		case "project/laser/duration":
-			if mode == LasercutterMode {
-				duration, err := strconv.Atoi(message)
-				if err != nil {
-					slog.Error("Error converting duration", "error", err)
-					return
-				}
+			duration, err := strconv.Atoi(message)
+			if err != nil {
+				slog.Error("Error converting duration", "error", err)
+				return
+			}
 
-				minutes := (duration % 3600) / 60
-				seconds := duration % 60
+			minutes := (duration % 3600) / 60
+			seconds := duration % 60
 
-				if minutes%2 == 0 && seconds == 57 {
-					correction := time.Date(2000, time.February, 0, 0, minutes+1, 0, 0, time.UTC)
-					ledBoardClient.SetDate(correction)
-				}
+			if minutes%2 == 0 && seconds == 57 {
+				correction := time.Date(2000, time.February, 0, 0, minutes+1, 0, 0, time.UTC)
+				ledBoardClient.SetDate(correction)
 			}
 
 		case "project/laser/finished":
-			if mode == LasercutterMode && message != "" {
+			if message != "" {
 				duration, err := strconv.Atoi(message)
 				if err != nil {
 					slog.Error("Error converting duration", "error", err)
