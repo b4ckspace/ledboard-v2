@@ -130,7 +130,7 @@ func (s *Screens) LaserFinished(duration int) string {
 		}
 	}
 
-	cmd += ledboard.ControlPatternIn + ledboard.PatternPeelOffL // Original was PEEL_OFF_R, but that's not defined. Assuming PEEL_OFF_L
+	cmd += ledboard.ControlPatternIn + ledboard.PatternPeelOffR
 
 	cmd += ledboard.FontNormal7x6
 	cmd += ledboard.ControlFontColor + ledboard.FontColorGreen
