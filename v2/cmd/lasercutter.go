@@ -14,12 +14,10 @@ import (
 )
 
 // RunLasercutterMode runs the application in lasercutter mode.
-func RunLasercutterMode(cfg *config.Config) {
+func RunLasercutterMode(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient) {
 	// Initialize screens manager
 	screensManager := screens.NewScreens()
 
-	// Initialize LED Board Client
-	ledBoardClient := ledboard.NewClient(cfg.LedBoardHost, 9520)
 	err := ledBoardClient.Init()
 	if err != nil {
 		slog.Error("Failed to initialize LED board client", "error", err)

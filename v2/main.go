@@ -8,6 +8,7 @@ import (
 
 	"github.com/b4ckspace/ledboard-v2/cmd"
 	"github.com/b4ckspace/ledboard-v2/config"
+	"github.com/b4ckspace/ledboard-v2/ledboard"
 	"github.com/b4ckspace/ledboard-v2/mqttclient"
 )
 
@@ -39,6 +40,9 @@ func main() {
 	}
 	slog.Info("Loaded configuration", "config", fmt.Sprintf("%+v", cfg))
 
+	// Initialize LED Board Client (concrete implementation)
+	ledBoardClient := ledboard.NewClient(cfg.LedBoardHost, 9520)
+
 	// Connect to MQTT
 	err = mqttclient.Connect(cfg)
 	if err != nil {
@@ -49,10 +53,9 @@ func main() {
 
 	switch cfg.Mode {
 	case "default":
-		cmd.RunDefaultMode(cfg)
+		cmd.RunDefaultMode(cfg, ledBoardClient)
 	case "lasercutter":
-		slog.Error("Lasercutter mode not yet implemented.")
-		os.Exit(1)
+		cmd.RunLasercutterMode(cfg, ledBoardClient)
 	default:
 		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
 		os.Exit(1)

@@ -9,14 +9,23 @@ import (
 	"github.com/b4ckspace/ledboard-v2/utils"
 )
 
-// Client represents the LED board client
+// LEDBoardClient defines the interface for interacting with the LED board.
+type LEDBoardClient interface {
+	Init() error
+	Send(datagram string)
+	SetDate(date time.Time)
+	SendScreen(screen string)
+	SendScreens(screens []string)
+}
+
+// Client implements the LEDBoardClient interface.
 type Client struct {
 	host string
 	port int
 	conn *net.UDPConn
 }
 
-// NewClient creates a new LED board client instance
+// NewClient creates a new LED board client instance.
 func NewClient(host string, port int) *Client {
 	return &Client{host: host, port: port}
 }
