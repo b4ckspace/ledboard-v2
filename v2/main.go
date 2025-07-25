@@ -43,19 +43,20 @@ func main() {
 	// Initialize LED Board Client (concrete implementation)
 	ledBoardClient := ledboard.NewClient(cfg.LedBoardHost, 9520)
 
-	// Connect to MQTT
-	err = mqttclient.Connect(cfg)
+	// Initialize MQTT Client
+	mqttClient := mqttclient.NewClient()
+	err = mqttClient.Connect(cfg)
 	if err != nil {
 		slog.Error("Failed to connect to MQTT broker", "error", err)
 		os.Exit(1)
 	}
-	defer mqttclient.Disconnect()
+	defer mqttClient.Disconnect()
 
 	switch cfg.Mode {
 	case "default":
-		cmd.RunDefaultMode(cfg, ledBoardClient)
+		cmd.RunDefaultMode(cfg, ledBoardClient, mqttClient)
 	case "lasercutter":
-		cmd.RunLasercutterMode(cfg, ledBoardClient)
+		cmd.RunLasercutterMode(cfg, ledBoardClient, mqttClient)
 	default:
 		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
 		os.Exit(1)

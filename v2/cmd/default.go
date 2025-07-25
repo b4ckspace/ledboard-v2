@@ -5,16 +5,20 @@ import (
 	"strconv"
 	"time"
 
-	mqtt "github.com/eclipse/paho.mqtt.golang"
+	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/b4ckspace/ledboard-v2/config"
 	"github.com/b4ckspace/ledboard-v2/ledboard"
-	"github.com/b4ckspace/ledboard-v2/mqttclient"
 	"github.com/b4ckspace/ledboard-v2/screens"
 	"github.com/b4ckspace/ledboard-v2/utils"
 )
 
+// MQTTClient defines the interface for MQTT client operations.
+type MQTTClient interface {
+	Subscribe(topic string, handler mqttlib.MessageHandler) error
+}
+
 // RunDefaultMode runs the application in default mode.
-func RunDefaultMode(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient) {
+func RunDefaultMode(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, mqttClient MQTTClient) {
 	// Initialize screens manager
 	screensManager := screens.NewScreens()
 
@@ -27,7 +31,7 @@ func RunDefaultMode(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient) 
 	var memberCount int
 
 	// Define a message handler for MQTT messages
-	messageHandler := func(client mqtt.Client, msg mqtt.Message) {
+	messageHandler := func(client mqttlib.Client, msg mqttlib.Message) {
 		message := string(msg.Payload())
 		slog.Info("Received MQTT message", "topic", msg.Topic(), "value", message)
 
@@ -71,14 +75,14 @@ func RunDefaultMode(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient) 
 	}
 
 	// Subscribe to MQTT topics
-	mqttclient.Subscribe("psa/alarm", messageHandler)
-	mqttclient.Subscribe("psa/donation", messageHandler)
-	mqttclient.Subscribe("psa/pizza", messageHandler)
-	mqttclient.Subscribe("psa/newMember", messageHandler)
-	mqttclient.Subscribe("psa/message", messageHandler)
-	mqttclient.Subscribe("psa/nowPlaying", messageHandler)
-	mqttclient.Subscribe("sensor/door/bell", messageHandler)
-	mqttclient.Subscribe("sensor/space/member/present", messageHandler)
+	mqttClient.Subscribe("psa/alarm", messageHandler)
+	mqttClient.Subscribe("psa/donation", messageHandler)
+	mqttClient.Subscribe("psa/pizza", messageHandler)
+	mqttClient.Subscribe("psa/newMember", messageHandler)
+	mqttClient.Subscribe("psa/message", messageHandler)
+	mqttClient.Subscribe("psa/nowPlaying", messageHandler)
+	mqttClient.Subscribe("sensor/door/bell", messageHandler)
+	mqttClient.Subscribe("sensor/space/member/present", messageHandler)
 
 	// PingProbe
 	aliveProbe := utils.NewPingProbe(cfg.Mqtt.Host, cfg.Ping) // Assuming config.mqtt.host is the host to ping
