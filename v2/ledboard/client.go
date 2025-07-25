@@ -45,6 +45,11 @@ func (c *Client) Send(datagram string) {
 	}
 
 	message := []byte(datagram)
+
+	// Debugging: Print the raw datagram being sent
+	log.Printf("Sending to LED board (raw): %q\n", datagram)
+	log.Printf("Sending to LED board (hex): %x\n", message)
+
 	_, err := c.conn.Write(message)
 	if err != nil {
 		log.Printf("Failed sending UDP message: %v", err)

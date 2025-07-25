@@ -28,7 +28,7 @@ func GenerateIdleCommand(memberCount int) string {
 	cmd += ledboard.ControlLineFeed
 
 	cmd += ledboard.ControlFontColor + ledboard.FontColorYellow
-	cmd += fmt.Sprintf("members present: %d", memberCount)
+	cmd += fmt.Sprintf("humans present: %d", memberCount)
 	cmd += ledboard.PauseSecond4 + "9999"
 
 	return cmd
