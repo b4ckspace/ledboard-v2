@@ -10,6 +10,7 @@ import (
 	"github.com/b4ckspace/ledboard-v2/config"
 	"github.com/b4ckspace/ledboard-v2/ledboard"
 	"github.com/b4ckspace/ledboard-v2/mqttclient"
+	"github.com/b4ckspace/ledboard-v2/utils"
 )
 
 func main() {
@@ -52,11 +53,14 @@ func main() {
 	}
 	defer mqttClient.Disconnect()
 
+	// Initialize PingProbe
+	aliveProbe := utils.NewPingProbe(cfg.LedBoardHost, cfg.Ping)
+
 	switch cfg.Mode {
 	case string(cmd.DefaultMode):
-		cmd.RunApplication(cfg, ledBoardClient, mqttClient, cmd.DefaultMode)
+		cmd.RunApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.DefaultMode)
 	case string(cmd.LasercutterMode):
-		cmd.RunApplication(cfg, ledBoardClient, mqttClient, cmd.LasercutterMode)
+		cmd.RunApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.LasercutterMode)
 	default:
 		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
 		os.Exit(1)

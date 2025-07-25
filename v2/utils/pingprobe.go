@@ -4,12 +4,19 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/go-ping/ping"
+	"github.com/prometheus-community/pro-bing"
 	"github.com/b4ckspace/ledboard-v2/config"
 )
 
-// PingProbe monitors the aliveness of a host.
-type PingProbe struct {
+// PingProbe defines the interface for monitoring host aliveness.
+type PingProbe interface {
+	Start()
+	IsAlive() bool
+	AliveEvents() <-chan bool
+}
+
+// probe implements the PingProbe interface.
+type probe struct {
 	host               string
 	alive              bool
 	hostAliveCount     int
@@ -20,8 +27,8 @@ type PingProbe struct {
 }
 
 // NewPingProbe creates a new PingProbe instance.
-func NewPingProbe(host string, cfg config.PingConfig) *PingProbe {
-	return &PingProbe{
+func NewPingProbe(host string, cfg config.PingConfig) PingProbe {
+	return &probe{
 		host:               host,
 		consecutiveAnswers: cfg.ConsecutiveAnswers,
 		probeInterval:      time.Duration(cfg.Interval) * time.Second,
@@ -30,12 +37,12 @@ func NewPingProbe(host string, cfg config.PingConfig) *PingProbe {
 }
 
 // Start starts the ping probe.
-func (p *PingProbe) Start() {
+func (p *probe) Start() {
 	ticker := time.NewTicker(p.probeInterval)
 	defer ticker.Stop()
 
 	for range ticker.C {
-		pinger, err := ping.NewPinger(p.host)
+		pinger, err := probing.NewPinger(p.host)
 		if err != nil {
 			slog.Error("Error creating pinger", "error", err)
 			continue
@@ -51,12 +58,11 @@ func (p *PingProbe) Start() {
 			continue
 		}
 
-		stats := pinger.Statistics()
-		p.handlePingResult(stats.PacketLoss == 0)
+		p.handlePingResult(pinger.Statistics().PacketLoss == 0)
 	}
 }
 
-func (p *PingProbe) handlePingResult(alive bool) {
+func (p *probe) handlePingResult(alive bool) {
 	if alive {
 		if !p.alive && p.hostAliveCount >= p.consecutiveAnswers {
 			p.alive = true
@@ -71,12 +77,12 @@ func (p *PingProbe) handlePingResult(alive bool) {
 }
 
 // IsAlive returns true if the host is currently considered alive.
-func (p *PingProbe) IsAlive() bool {
+func (p *probe) IsAlive() bool {
 	return p.alive
 }
 
 // AliveEvents returns a channel that sends true when the host becomes alive.
-func (p *PingProbe) AliveEvents() <-chan bool {
+func (p *probe) AliveEvents() <-chan bool {
 	return p.aliveChan
 }
 

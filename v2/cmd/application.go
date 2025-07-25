@@ -26,7 +26,7 @@ type MQTTClient interface {
 }
 
 // RunApplication runs the application based on the specified mode.
-func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, mqttClient MQTTClient, mode Mode) {
+func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, mqttClient MQTTClient, aliveProbe utils.PingProbe, mode Mode) {
 	// Initialize screens manager
 	screensManager := screens.NewScreens()
 
@@ -182,7 +182,6 @@ func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, 
 	}
 
 	// PingProbe
-	aliveProbe := utils.NewPingProbe(cfg.Mqtt.Host, cfg.Ping) // Assuming config.mqtt.host is the host to ping
 	go aliveProbe.Start()
 
 	go func() {

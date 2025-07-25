@@ -3,8 +3,8 @@ package config
 import (
 	"encoding/json"
 	"fmt"
-	"io/ioutil"
 	"log/slog"
+	"os"
 )
 
 type StatusConfig struct {
@@ -34,7 +34,7 @@ var activeConfig *Config
 func LoadConfig(configPath string) (*Config, error) {
 	slog.Info("Attempting to load config from", "path", configPath)
 
-	data, err := ioutil.ReadFile(configPath)
+	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, fmt.Errorf("failed to read config file: %w", err)
 	}
