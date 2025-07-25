@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"log"
+	"log/slog"
 	"os"
 
 	"github.com/b4ckspace/ledboard-v2/cmd"
@@ -13,24 +13,37 @@ import (
 
 func main() {
 	configPath := flag.String("config", "", "Full path to the configuration JSON file")
+	debug := flag.Bool("debug", false, "Enable debug logging")
 	flag.Parse()
 
+	// Set up a default logger
+	var logLevel slog.Level
+	if *debug {
+		logLevel = slog.LevelDebug
+	} else {
+		logLevel = slog.LevelInfo
+	}
+	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
+	slog.SetDefault(slog.New(handler))
+
 	if *configPath == "" {
-		fmt.Println("Usage: go run main.go --config <full_path_to_config.json>")
+		slog.Error("Usage: go run main.go --config <full_path_to_config.json>")
 		os.Exit(1)
 	}
 
 	// Load configuration
 	cfg, err := config.LoadConfig(*configPath)
 	if err != nil {
-		log.Fatalf("Failed to load configuration: %v", err)
+		slog.Error("Failed to load configuration", "error", err)
+		os.Exit(1)
 	}
-	fmt.Printf("Loaded configuration: %+v\n", cfg)
+	slog.Info("Loaded configuration", "config", fmt.Sprintf("%+v", cfg))
 
 	// Connect to MQTT
 	err = mqttclient.Connect(cfg)
 	if err != nil {
-		log.Fatalf("Failed to connect to MQTT broker: %v", err)
+		slog.Error("Failed to connect to MQTT broker", "error", err)
+		os.Exit(1)
 	}
 	defer mqttclient.Disconnect()
 
@@ -38,8 +51,10 @@ func main() {
 	case "default":
 		cmd.RunDefaultMode(cfg)
 	case "lasercutter":
-		cmd.RunLasercutterMode(cfg)
+		slog.Error("Lasercutter mode not yet implemented.")
+		os.Exit(1)
 	default:
-		log.Fatalf("Unknown configuration mode: %s", cfg.Mode)
+		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
+		os.Exit(1)
 	}
 }

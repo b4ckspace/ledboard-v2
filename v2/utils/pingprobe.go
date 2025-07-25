@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"log"
+	"log/slog"
 	"time"
 
 	"github.com/go-ping/ping"
@@ -37,7 +37,7 @@ func (p *PingProbe) Start() {
 	for range ticker.C {
 		pinger, err := ping.NewPinger(p.host)
 		if err != nil {
-			log.Printf("Error creating pinger: %v", err)
+			slog.Error("Error creating pinger", "error", err)
 			continue
 		}
 		pinger.Count = 1 // Send only one ping packet
@@ -45,7 +45,7 @@ func (p *PingProbe) Start() {
 
 		err = pinger.Run()
 		if err != nil {
-			log.Printf("Error running pinger: %v", err)
+			slog.Error("Error running pinger", "error", err)
 			// Assume dead if ping fails
 			p.handlePingResult(false)
 			continue

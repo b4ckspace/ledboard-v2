@@ -2,7 +2,7 @@ package mqttclient
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
@@ -17,10 +17,10 @@ func Connect(cfg *config.Config) error {
 	opts.SetKeepAlive(60 * time.Second)
 	opts.SetPingTimeout(1 * time.Second)
 	opts.SetConnectionLostHandler(func(c mqtt.Client, err error) {
-		log.Printf("MQTT Connection lost: %v", err)
+		slog.Warn("MQTT Connection lost", "error", err)
 	})
 	opts.SetOnConnectHandler(func(c mqtt.Client) {
-		log.Println("MQTT Connected")
+		slog.Info("MQTT Connected")
 	})
 
 	client = mqtt.NewClient(opts)
@@ -33,13 +33,13 @@ func Connect(cfg *config.Config) error {
 
 func Publish(topic string, payload string) {
 	if client == nil || !client.IsConnected() {
-		log.Println("MQTT client not connected, cannot publish.")
+		slog.Warn("MQTT client not connected, cannot publish.")
 		return
 	}
 	token := client.Publish(topic, 0, false, payload)
 	token.Wait()
 	if token.Error() != nil {
-		log.Printf("Failed to publish message to topic %s: %v", topic, token.Error())
+		slog.Error("Failed to publish message", "topic", topic, "error", token.Error())
 	}
 }
 
@@ -58,6 +58,6 @@ func Subscribe(topic string, handler mqtt.MessageHandler) error {
 func Disconnect() {
 	if client != nil && client.IsConnected() {
 		client.Disconnect(250)
-		log.Println("MQTT Disconnected")
+		slog.Info("MQTT Disconnected")
 	}
 }

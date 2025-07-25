@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io/ioutil"
+	"log/slog"
 )
 
 type StatusConfig struct {
@@ -31,7 +32,7 @@ type Config struct {
 var activeConfig *Config
 
 func LoadConfig(configPath string) (*Config, error) {
-	fmt.Printf("Attempting to load config from: %s\n", configPath)
+	slog.Info("Attempting to load config from", "path", configPath)
 
 	data, err := ioutil.ReadFile(configPath)
 	if err != nil {
@@ -51,4 +52,3 @@ func LoadConfig(configPath string) (*Config, error) {
 func GetConfig() *Config {
 	return activeConfig
 }
-

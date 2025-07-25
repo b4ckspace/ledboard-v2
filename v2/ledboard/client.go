@@ -2,7 +2,7 @@ package ledboard
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"time"
 
@@ -33,26 +33,25 @@ func (c *Client) Init() error {
 		return fmt.Errorf("failed to dial UDP: %w", err)
 	}
 	c.conn = conn
-	log.Println("LED Board Client initialized")
+	slog.Info("LED Board Client initialized")
 	return nil
 }
 
 // Send sends a datagram to the LED board.
 func (c *Client) Send(datagram string) {
 	if c.conn == nil {
-		log.Println("UDP connection not initialized, cannot send.")
+		slog.Warn("UDP connection not initialized, cannot send.")
 		return
 	}
 
 	message := []byte(datagram)
 
 	// Debugging: Print the raw datagram being sent
-	log.Printf("Sending to LED board (raw): %q\n", datagram)
-	log.Printf("Sending to LED board (hex): %x\n", message)
+	slog.Debug("Sending to LED board (raw)", "datagram", fmt.Sprintf("%q", datagram))
 
 	_, err := c.conn.Write(message)
 	if err != nil {
-		log.Printf("Failed sending UDP message: %v", err)
+		slog.Error("Failed sending UDP message", "error", err)
 	}
 }
 

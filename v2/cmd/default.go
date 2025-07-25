@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"log"
+	"log/slog"
 	"strconv"
 	"time"
 
@@ -19,10 +19,11 @@ func RunDefaultMode(cfg *config.Config) {
 	screensManager := screens.NewScreens()
 
 	// Initialize LED Board Client
-	ledBoardClient := ledboard.NewClient(cfg.LedBoardHost, 9520) // Assuming config.mqtt.host is the LED board host
+	ledBoardClient := ledboard.NewClient(cfg.LedBoardHost, 9520)
 	err := ledBoardClient.Init()
 	if err != nil {
-		log.Fatalf("Failed to initialize LED board client: %v", err)
+		slog.Error("Failed to initialize LED board client", "error", err)
+		return
 	}
 
 	var memberCount int
@@ -30,13 +31,13 @@ func RunDefaultMode(cfg *config.Config) {
 	// Define a message handler for MQTT messages
 	messageHandler := func(client mqtt.Client, msg mqtt.Message) {
 		message := string(msg.Payload())
-		log.Printf("Received MQTT topic %s with value '%s'", msg.Topic(), message)
+		slog.Info("Received MQTT message", "topic", msg.Topic(), "value", message)
 
 		switch msg.Topic() {
 		case "sensor/space/member/present":
 			count, err := strconv.Atoi(message)
 			if err != nil {
-				log.Printf("Error converting member count: %v", err)
+				slog.Error("Error converting member count", "error", err)
 				return
 			}
 			memberCount = count
@@ -87,7 +88,7 @@ func RunDefaultMode(cfg *config.Config) {
 
 	go func() {
 		for range aliveProbe.AliveEvents() {
-			log.Println("Host is alive! Setting date and sending idle screen.")
+			slog.Info("Host is alive! Setting date and sending idle screen.")
 			ledBoardClient.SetDate(time.Now())
 			ledBoardClient.SendScreen(screensManager.Idle(memberCount))
 		}
