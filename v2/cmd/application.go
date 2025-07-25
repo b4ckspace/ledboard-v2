@@ -141,21 +141,44 @@ func RunApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, 
 	}
 
 	// Common MQTT subscriptions
-	mqttClient.Subscribe("psa/alarm", messageHandler)
-	mqttClient.Subscribe("psa/pizza", messageHandler)
-	mqttClient.Subscribe("psa/message", messageHandler)
-	mqttClient.Subscribe("sensor/door/bell", messageHandler)
-	mqttClient.Subscribe("sensor/space/member/present", messageHandler)
+	if err := mqttClient.Subscribe("psa/alarm", messageHandler); err != nil {
+		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/alarm", "error", err)
+	}
+	if err := mqttClient.Subscribe("psa/pizza", messageHandler); err != nil {
+		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/pizza", "error", err)
+	}
+	if err := mqttClient.Subscribe("psa/message", messageHandler); err != nil {
+		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/message", "error", err)
+	}
+	if err := mqttClient.Subscribe("sensor/door/bell", messageHandler); err != nil {
+		slog.Error("Failed to subscribe to MQTT topic", "topic", "sensor/door/bell", "error", err)
+	}
+	if err := mqttClient.Subscribe("sensor/space/member/present", messageHandler); err != nil {
+		slog.Error("Failed to subscribe to MQTT topic", "topic", "sensor/space/member/present", "error", err)
+	}
 
 	// Mode-specific MQTT subscriptions
-	if mode == DefaultMode {
-		mqttClient.Subscribe("psa/donation", messageHandler)
-		mqttClient.Subscribe("psa/newMember", messageHandler)
-		mqttClient.Subscribe("psa/nowPlaying", messageHandler)
-	} else if mode == LasercutterMode {
-		mqttClient.Subscribe("project/laser/operation", messageHandler)
-		mqttClient.Subscribe("project/laser/finished", messageHandler)
-		mqttClient.Subscribe("project/laser/duration", messageHandler)
+	switch mode {
+	case DefaultMode:
+		if err := mqttClient.Subscribe("psa/donation", messageHandler); err != nil {
+			slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/donation", "error", err)
+		}
+		if err := mqttClient.Subscribe("psa/newMember", messageHandler); err != nil {
+			slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/newMember", "error", err)
+		}
+		if err := mqttClient.Subscribe("psa/nowPlaying", messageHandler); err != nil {
+			slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/nowPlaying", "error", err)
+		}
+	case LasercutterMode:
+		if err := mqttClient.Subscribe("project/laser/operation", messageHandler); err != nil {
+			slog.Error("Failed to subscribe to MQTT topic", "topic", "project/laser/operation", "error", err)
+		}
+		if err := mqttClient.Subscribe("project/laser/finished", messageHandler); err != nil {
+			slog.Error("Failed to subscribe to MQTT topic", "topic", "project/laser/finished", "error", err)
+		}
+		if err := mqttClient.Subscribe("project/laser/duration", messageHandler); err != nil {
+			slog.Error("Failed to subscribe to MQTT topic", "topic", "project/laser/duration", "error", err)
+		}
 	}
 
 	// PingProbe

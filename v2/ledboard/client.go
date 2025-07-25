@@ -49,7 +49,7 @@ func (c *Client) Init() error {
 // Send sends a datagram to the LED board.
 func (c *Client) Send(datagram string) {
 	if c.conn == nil {
-		slog.Warn("UDP connection not initialized, cannot send.")
+		slog.Warn("UDP connection not initialized, cannot send")
 		return
 	}
 
@@ -103,8 +103,6 @@ func (c *Client) SendScreens(screens []string) {
 
 func (c *Client) buildDatagram(screen string) string {
 	var cmd string
-	cmd += ControlHead
-
 	cmd = "\x01Z00\x02A"
 	cmd += "\x0fETAA" // store to RAM
 

@@ -43,7 +43,7 @@ func (c *Client) Connect(cfg *config.Config) error {
 // Publish publishes a message to the specified MQTT topic.
 func (c *Client) Publish(topic string, payload string) {
 	if c.mqttClient == nil || !c.mqttClient.IsConnected() {
-		slog.Warn("MQTT client not connected, cannot publish.")
+		slog.Warn("MQTT client not connected, cannot publish")
 		return
 	}
 	token := c.mqttClient.Publish(topic, 0, false, payload)
@@ -56,7 +56,7 @@ func (c *Client) Publish(topic string, payload string) {
 // Subscribe subscribes to the specified MQTT topic.
 func (c *Client) Subscribe(topic string, handler mqtt.MessageHandler) error {
 	if c.mqttClient == nil || !c.mqttClient.IsConnected() {
-		return fmt.Errorf("MQTT client not connected, cannot subscribe.")
+		return fmt.Errorf("MQTT client not connected, cannot subscribe")
 	}
 	token := c.mqttClient.Subscribe(topic, 0, handler)
 	token.Wait()
