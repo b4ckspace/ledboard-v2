@@ -56,13 +56,16 @@ func main() {
 	// Initialize PingProbe
 	aliveProbe := utils.NewPingProbe(cfg.LedBoardHost, cfg.Ping)
 
+	var appCtx *cmd.ApplicationContext
 	switch cfg.Mode {
 	case string(cmd.DefaultMode):
-		cmd.RunApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.DefaultMode)
+		appCtx = cmd.NewApplicationContext(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.DefaultMode)
 	case string(cmd.LasercutterMode):
-		cmd.RunApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.LasercutterMode)
+		appCtx = cmd.NewApplicationContext(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.LasercutterMode)
 	default:
 		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
 		os.Exit(1)
 	}
+
+	appCtx.Run()
 }
