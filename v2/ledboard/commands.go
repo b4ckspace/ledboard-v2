@@ -2,20 +2,20 @@ package ledboard
 
 // Control commands
 const (
-	ControlHead             = "\x01\x5A\x30\x30\x02\x41\x58"
-	ControlHalfSpace        = "\x82"
-	ControlEnd              = "\x04"
-	ControlFlash            = "\x07"
-	ControlPatternIn        = "\x06\x0aI"
-	ControlPatternOut       = "\x06\x0aO"
-	ControlSpecial          = "\x0B"
-	ControlFrame            = "\x0C"
-	ControlSpeed            = "\x0F"
-	ControlLineFeed         = "\x0D"
-	ControlFontColor        = "\x1C"
-	ControlBackgroundColor  = "\x1D"
-	ControlAlignHorizontal  = "\x1E"
-	ControlAlignVertical    = "\x1F"
+	ControlHead            = "\x01\x5A\x30\x30\x02\x41\x58"
+	ControlHalfSpace       = "\x82"
+	ControlEnd             = "\x04"
+	ControlFlash           = "\x07"
+	ControlPatternIn       = "\x06\x0aI"
+	ControlPatternOut      = "\x06\x0aO"
+	ControlSpecial         = "\x0B"
+	ControlFrame           = "\x0C"
+	ControlSpeed           = "\x0F"
+	ControlLineFeed        = "\x0D"
+	ControlFontColor       = "\x1C"
+	ControlBackgroundColor = "\x1D"
+	ControlAlignHorizontal = "\x1E"
+	ControlAlignVertical   = "\x1F"
 )
 
 // Flash commands
@@ -26,23 +26,23 @@ const (
 
 // Special commands
 const (
-	SpecialMMDDYYSLA = "\x20"
-	SpecialDDMMYYSLA = "\x21"
-	SpecialMMDDYYDSH = "\x22"
-	SpecialDDMMYYDSH = "\x23"
+	SpecialMMDDYYSLA   = "\x20"
+	SpecialDDMMYYSLA   = "\x21"
+	SpecialMMDDYYDSH   = "\x22"
+	SpecialDDMMYYDSH   = "\x23"
 	SpecialMMDDYYYYDOT = "\x24"
-	SpecialYY        = "\x25"
-	SpecialYYYY      = "\x26"
-	SpecialMM        = "\x27"
-	SpecialMMM       = "\x28"
-	SpecialDD        = "\x29"
-	SpecialDDOfWeek  = "\x2A"
-	SpecialDDDOfWeek = "\x2B"
-	SpecialHH        = "\x2C"
-	SpecialMIN       = "\x2D"
-	SpecialSEC       = "\x2E"
-	SpecialHHMin24   = "\x2F"
-	SpecialHHMin12   = "\x30"
+	SpecialYY          = "\x25"
+	SpecialYYYY        = "\x26"
+	SpecialMM          = "\x27"
+	SpecialMMM         = "\x28"
+	SpecialDD          = "\x29"
+	SpecialDDOfWeek    = "\x2A"
+	SpecialDDDOfWeek   = "\x2B"
+	SpecialHH          = "\x2C"
+	SpecialMIN         = "\x2D"
+	SpecialSEC         = "\x2E"
+	SpecialHHMin24     = "\x2F"
+	SpecialHHMin12     = "\x30"
 )
 
 // Pattern commands
@@ -93,14 +93,14 @@ const (
 
 // Align commands
 const (
-	AlignHorizontalCenter    = "\x30"
-	AlignHorizontalLeft      = "\x31"
-	AlignHorizontalRight     = "\x32"
-	AlignHorizontalReserved  = "\x33"
-	AlignVerticalCenter      = "\x30"
-	AlignVerticalTop         = "\x31"
-	AlignVerticalBottom      = "\x32"
-	AlignVerticalReserved    = "\x33"
+	AlignHorizontalCenter   = "\x30"
+	AlignHorizontalLeft     = "\x31"
+	AlignHorizontalRight    = "\x32"
+	AlignHorizontalReserved = "\x33"
+	AlignVerticalCenter     = "\x30"
+	AlignVerticalTop        = "\x31"
+	AlignVerticalBottom     = "\x32"
+	AlignVerticalReserved   = "\x33"
 )
 
 // BackgroundColor commands
@@ -139,23 +139,23 @@ const (
 
 // FontColor commands
 const (
-	FontColorBlack        = "\x30"
-	FontColorRed          = "\x31"
-	FontColorGreen        = "\x32"
-	FontColorYellow       = "\x33"
-	FontColorYGRCharacter = "\x34"
+	FontColorBlack         = "\x30"
+	FontColorRed           = "\x31"
+	FontColorGreen         = "\x32"
+	FontColorYellow        = "\x33"
+	FontColorYGRCharacter  = "\x34"
 	FontColorYGRHorizontal = "\x35"
-	FontColorYGRWave      = "\x36"
-	FontColorYGRDiagonal  = "\x37"
+	FontColorYGRWave       = "\x36"
+	FontColorYGRDiagonal   = "\x37"
 )
 
 // Speed commands
 const (
-	SpeedVeryFast    = "\x30"
-	SpeedFast        = "\x31"
-	SpeedMediumFast  = "\x32"
-	SpeedMedium      = "\x33"
-	SpeedMediumSlow  = "\x34"
-	SpeedSlow        = "\x35"
-	SpeedVerySlow    = "\x36"
+	SpeedVeryFast   = "\x30"
+	SpeedFast       = "\x31"
+	SpeedMediumFast = "\x32"
+	SpeedMedium     = "\x33"
+	SpeedMediumSlow = "\x34"
+	SpeedSlow       = "\x35"
+	SpeedVerySlow   = "\x36"
 )

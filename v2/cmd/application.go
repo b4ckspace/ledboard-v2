@@ -1,17 +1,16 @@
 package cmd
 
 import (
+	"context"
 	"log/slog"
-	"os"
 	"strconv"
 	"time"
 
+	mqttlib "github.com/eclipse/paho.mqtt.golang"
 	"github.com/b4ckspace/ledboard-v2/config"
 	"github.com/b4ckspace/ledboard-v2/ledboard"
 	"github.com/b4ckspace/ledboard-v2/screens"
 	"github.com/b4ckspace/ledboard-v2/utils"
-
-	mqttlib "github.com/eclipse/paho.mqtt.golang"
 )
 
 // Mode represents the application's operational mode.
@@ -25,10 +24,12 @@ const (
 // MQTTClient defines the interface for MQTT client operations.
 type MQTTClient interface {
 	Subscribe(topic string, handler mqttlib.MessageHandler) error
+	Disconnect() // Add Disconnect to the interface
 }
 
 // Application holds the dependencies and state for the MQTT message handler.
 type Application struct {
+	ctx            context.Context // Add context to the struct
 	cfg            *config.Config
 	ledBoardClient ledboard.LEDBoardClient
 	mqttClient     MQTTClient
@@ -39,14 +40,15 @@ type Application struct {
 	mode           Mode
 }
 
-// NewApplication creates a new ApplicationContext.
-func NewApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, mqttClient MQTTClient, aliveProbe utils.PingProbe, mode Mode) *Application {
+// NewApplication creates a new Application.
+func NewApplication(cfg *config.Config, ledBoardClient ledboard.LEDBoardClient, mqttClient MQTTClient, aliveProbe utils.PingProbe, mode Mode, ctx context.Context) *Application {
 	return &Application{
+		ctx:            ctx, // Store the context
 		cfg:            cfg,
 		ledBoardClient: ledBoardClient,
 		mqttClient:     mqttClient,
 		aliveProbe:     aliveProbe,
-		screens:        screens.NewScreens(), // Initialize screensManager here
+		screens:        screens.NewScreens(),
 		mode:           mode,
 	}
 }
@@ -161,23 +163,23 @@ func (app *Application) Run() {
 	// Common MQTT subscriptions
 	if err := app.mqttClient.Subscribe("psa/alarm", app.handleMQTTMessage); err != nil {
 		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/alarm", "error", err)
-		os.Exit(1)
+		return // Return error instead of os.Exit(1)
 	}
 	if err := app.mqttClient.Subscribe("psa/pizza", app.handleMQTTMessage); err != nil {
 		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/pizza", "error", err)
-		os.Exit(1)
+		return // Return error instead of os.Exit(1)
 	}
 	if err := app.mqttClient.Subscribe("psa/message", app.handleMQTTMessage); err != nil {
 		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/message", "error", err)
-		os.Exit(1)
+		return // Return error instead of os.Exit(1)
 	}
 	if err := app.mqttClient.Subscribe("sensor/door/bell", app.handleMQTTMessage); err != nil {
 		slog.Error("Failed to subscribe to MQTT topic", "topic", "sensor/door/bell", "error", err)
-		os.Exit(1)
+		return // Return error instead of os.Exit(1)
 	}
 	if err := app.mqttClient.Subscribe("sensor/space/member/present", app.handleMQTTMessage); err != nil {
 		slog.Error("Failed to subscribe to MQTT topic", "topic", "sensor/space/member/present", "error", err)
-		os.Exit(1)
+		return // Return error instead of os.Exit(1)
 	}
 
 	// Mode-specific MQTT subscriptions
@@ -205,7 +207,13 @@ func (app *Application) Run() {
 	}
 
 	// PingProbe
-	go app.aliveProbe.Start()
+	go func() {
+		app.aliveProbe.Start()
+		// The aliveProbe goroutine will exit when the context is cancelled
+		<-app.ctx.Done()
+		slog.Info("Alive probe goroutine stopping due to context cancellation.")
+		// No explicit Stop method for PingProbe, assuming it cleans up on context done
+	}()
 
 	go func() {
 		for range app.aliveProbe.AliveEvents() {
@@ -215,6 +223,8 @@ func (app *Application) Run() {
 		}
 	}()
 
-	// Keep the main goroutine alive
-	select {}
+	// Keep the main goroutine alive until context is cancelled
+	<-app.ctx.Done()
+	slog.Info("Application context cancelled. Disconnecting MQTT client.")
+	app.mqttClient.Disconnect() // Disconnect MQTT client gracefully
 }

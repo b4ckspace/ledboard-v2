@@ -22,11 +22,11 @@ type MqttConfig struct {
 }
 
 type Config struct {
-	Mode        string       `json:"mode"`
+	Mode         string       `json:"mode"`
 	LedBoardHost string       `json:"ledBoardHost"` // New field for LED board hostname
-	Status      StatusConfig `json:"status"`
-	Ping        PingConfig   `json:"ping"`	
-	Mqtt        MqttConfig   `json:"mqtt"`
+	Status       StatusConfig `json:"status"`
+	Ping         PingConfig   `json:"ping"`
+	Mqtt         MqttConfig   `json:"mqtt"`
 }
 
 var activeConfig *Config

@@ -47,7 +47,7 @@ func (p *probe) Start() {
 			slog.Error("Error creating pinger", "error", err)
 			continue
 		}
-		pinger.Count = 1 // Send only one ping packet
+		pinger.Count = 1             // Send only one ping packet
 		pinger.Timeout = time.Second // Timeout for each ping
 
 		err = pinger.Run()

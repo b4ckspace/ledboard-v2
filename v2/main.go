@@ -1,10 +1,13 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log/slog"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"github.com/b4ckspace/ledboard-v2/cmd"
 	"github.com/b4ckspace/ledboard-v2/config"
@@ -51,17 +54,31 @@ func main() {
 		slog.Error("Failed to connect to MQTT broker", "error", err)
 		os.Exit(1)
 	}
-	defer mqttClient.Disconnect()
+	// Defer mqttClient.Disconnect() is moved to application.go to ensure it's called on graceful shutdown
 
 	// Initialize PingProbe
 	aliveProbe := utils.NewPingProbe(cfg.LedBoardHost, cfg.Ping)
 
+	// Set up context for graceful shutdown
+	ctx, cancel := context.WithCancel(context.Background())
+	defer cancel() // Ensure cancel is called when main exits
+
+	// Listen for OS signals to gracefully shut down
+	sigChan := make(chan os.Signal, 1)
+	signal.Notify(sigChan, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		sig := <-sigChan
+		slog.Info("Received signal, shutting down...", "signal", sig)
+		cancel() // Trigger context cancellation
+	}()
+
 	var app *cmd.Application
 	switch cfg.Mode {
 	case string(cmd.DefaultMode):
-		app = cmd.NewApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.DefaultMode)
+		app = cmd.NewApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.DefaultMode, ctx)
 	case string(cmd.LasercutterMode):
-		app = cmd.NewApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.LasercutterMode)
+		app = cmd.NewApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.LasercutterMode, ctx)
 	default:
 		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
 		os.Exit(1)

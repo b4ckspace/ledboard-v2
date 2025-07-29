@@ -115,7 +115,7 @@ func (s *Screens) LaserFinished(duration int) string {
 	cmd += ledboard.ControlPatternIn + ledboard.PatternScrollUp
 	cmd += ledboard.ControlPatternOut + ledboard.PatternScrollUp
 
-	if duration > 10 * 60 {
+	if duration > 10*60 {
 		cmd += ledboard.FontNormal14x8
 		cmd += ledboard.ControlFontColor + ledboard.FontColorGreen
 
