@@ -86,5 +86,9 @@ func main() {
 		os.Exit(1)
 	}
 
-	app.Run(ctx)
+	err = app.Run(ctx)
+	if err != nil {
+		slog.Error("Unable to run", "error", err)
+		os.Exit(1)
+	}
 }

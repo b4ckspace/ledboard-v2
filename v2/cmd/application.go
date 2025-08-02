@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
 	"strconv"
 	"time"
@@ -55,11 +56,10 @@ func (app *Application) getIdleScreen() string {
 }
 
 // Run runs the application based on the specified mode.
-func (app *Application) Run(ctx context.Context) {
+func (app *Application) Run(ctx context.Context) error {
 	err := app.ledBoardClient.Init()
 	if err != nil {
-		slog.Error("Failed to initialize LED board client", "error", err)
-		return
+		return fmt.Errorf("Failed to initialize LED board client: %s", err)
 	}
 
 	// Set time initially
@@ -67,58 +67,57 @@ func (app *Application) Run(ctx context.Context) {
 
 	// Common MQTT subscriptions
 	if err := app.mqttClient.Subscribe("psa/alarm", app.handleMQTTMessage); err != nil {
-		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/alarm", "error", err)
-		return // Return error instead of os.Exit(1)
+		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/alarm", err)
 	}
 	if err := app.mqttClient.Subscribe("psa/pizza", app.handleMQTTMessage); err != nil {
-		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/pizza", "error", err)
-		return // Return error instead of os.Exit(1)
+		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/pizza", err)
 	}
 	if err := app.mqttClient.Subscribe("psa/message", app.handleMQTTMessage); err != nil {
-		slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/message", "error", err)
-		return // Return error instead of os.Exit(1)
+		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/message", err)
 	}
 	if err := app.mqttClient.Subscribe("sensor/door/bell", app.handleMQTTMessage); err != nil {
-		slog.Error("Failed to subscribe to MQTT topic", "topic", "sensor/door/bell", "error", err)
-		return // Return error instead of os.Exit(1)
+		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "sensor/door/bell", err)
 	}
 	if err := app.mqttClient.Subscribe("sensor/space/member/present", app.handleMQTTMessage); err != nil {
-		slog.Error("Failed to subscribe to MQTT topic", "topic", "sensor/space/member/present", "error", err)
-		return // Return error instead of os.Exit(1)
+		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "sensor/space/member/present", err)
 	}
 
 	// Mode-specific MQTT subscriptions
 	switch app.mode {
 	case DefaultMode:
 		if err := app.mqttClient.Subscribe("psa/donation", app.handleMQTTMessage); err != nil {
-			slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/donation", "error", err)
+			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/donation", err)
 		}
 		if err := app.mqttClient.Subscribe("psa/newMember", app.handleMQTTMessage); err != nil {
-			slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/newMember", "error", err)
+			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/newMember", err)
 		}
 		if err := app.mqttClient.Subscribe("psa/nowPlaying", app.handleMQTTMessage); err != nil {
-			slog.Error("Failed to subscribe to MQTT topic", "topic", "psa/nowPlaying", "error", err)
+			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/nowPlaying", err)
 		}
 	case LasercutterMode:
 		if err := app.mqttClient.Subscribe("project/laser/operation", app.handleMQTTMessage); err != nil {
-			slog.Error("Failed to subscribe to MQTT topic", "topic", "project/laser/operation", "error", err)
+			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "project/laser/operation", err)
 		}
 		if err := app.mqttClient.Subscribe("project/laser/finished", app.handleMQTTMessage); err != nil {
-			slog.Error("Failed to subscribe to MQTT topic", "topic", "project/laser/finished", "error", err)
+			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "project/laser/finished", err)
 		}
 		if err := app.mqttClient.Subscribe("project/laser/duration", app.handleMQTTMessage); err != nil {
-			slog.Error("Failed to subscribe to MQTT topic", "topic", "project/laser/duration", "error", err)
+			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "project/laser/duration", err)
 		}
 	}
 
 	err = app.pingProbe.Run(ctx, func() {
-		slog.Info("Host is alive! Setting date and sending idle screen.")
+		slog.Info("ledboard is alive, setting date and sending idle screen")
 		app.ledBoardClient.SetDate(time.Now())
 		app.ledBoardClient.SendScreen(app.getIdleScreen())
 	})
+	if err != nil {
+		return fmt.Errorf("issues while pinging: %s", err)
+	}
 
 	slog.Info("Application context cancelled. Disconnecting MQTT client.")
 	app.mqttClient.Disconnect() // Disconnect MQTT client gracefully
+	return nil
 }
 
 // handleMQTTMessage processes incoming MQTT messages.
