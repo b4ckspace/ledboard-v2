@@ -1,7 +1,7 @@
 package ledboard
 
-// Control commands
 const (
+	// Control commands
 	ControlHead            = "\x01\x5A\x30\x30\x02\x41\x58"
 	ControlHalfSpace       = "\x82"
 	ControlEnd             = "\x04"
@@ -16,16 +16,12 @@ const (
 	ControlBackgroundColor = "\x1D"
 	ControlAlignHorizontal = "\x1E"
 	ControlAlignVertical   = "\x1F"
-)
 
-// Flash commands
-const (
+	// Flash commands
 	FlashOff = "\x30"
 	FlashOn  = "\x31"
-)
 
-// Special commands
-const (
+	// Special commands
 	SpecialMMDDYYSLA   = "\x20"
 	SpecialDDMMYYSLA   = "\x21"
 	SpecialMMDDYYDSH   = "\x22"
@@ -43,10 +39,8 @@ const (
 	SpecialSEC         = "\x2E"
 	SpecialHHMin24     = "\x2F"
 	SpecialHHMin12     = "\x30"
-)
 
-// Pattern commands
-const (
+	// Pattern commands
 	PatternRandom                  = "\x2F"
 	PatternJumpOut                 = "\x30"
 	PatternMoveLeft                = "\x31"
@@ -81,18 +75,14 @@ const (
 	PatternToFourSides             = "\x4E"
 	PatternFromFourSides           = "\x4F"
 	PatternScrollOutFromFourBlocks = "\x50"
-)
 
-// Pause commands
-const (
+	// Pause commands
 	PauseSecond2      = "\x0E\x30"
 	PauseSecond4      = "\x0E\x32"
 	PauseMillisecond2 = "\x0E\x31"
 	PauseMillisecond4 = "\x0E\x33"
-)
 
-// Align commands
-const (
+	// Align commands
 	AlignHorizontalCenter   = "\x30"
 	AlignHorizontalLeft     = "\x31"
 	AlignHorizontalRight    = "\x32"
@@ -101,18 +91,14 @@ const (
 	AlignVerticalTop        = "\x31"
 	AlignVerticalBottom     = "\x32"
 	AlignVerticalReserved   = "\x33"
-)
 
-// BackgroundColor commands
-const (
+	// BackgroundColor commands
 	BackgroundColorBlack  = "\x30"
 	BackgroundColorRed    = "\x31"
 	BackgroundColorGreen  = "\x32"
 	BackgroundColorYellow = "\x33"
-)
 
-// Font commands
-const (
+	// Font commands
 	FontNormal5x5   = "\x1A\x30"
 	FontNormal7x6   = "\x1A\x31"
 	FontNormal14x8  = "\x1A\x32"
@@ -135,10 +121,8 @@ const (
 	FontCustom7     = "\x1A\x67"
 	FontCustom8     = "\x1A\x68"
 	FontCustom9     = "\x1A\x69"
-)
 
-// FontColor commands
-const (
+	// FontColor commands
 	FontColorBlack         = "\x30"
 	FontColorRed           = "\x31"
 	FontColorGreen         = "\x32"
@@ -147,10 +131,8 @@ const (
 	FontColorYGRHorizontal = "\x35"
 	FontColorYGRWave       = "\x36"
 	FontColorYGRDiagonal   = "\x37"
-)
 
-// Speed commands
-const (
+	// Speed commands
 	SpeedVeryFast   = "\x30"
 	SpeedFast       = "\x31"
 	SpeedMediumFast = "\x32"
