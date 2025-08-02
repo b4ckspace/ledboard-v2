@@ -2,66 +2,69 @@ package main
 
 import (
 	"context"
-	"flag"
-	"fmt"
 	"log/slog"
 	"os"
 	"os/signal"
 	"syscall"
 
 	"github.com/b4ckspace/ledboard-v2/cmd"
-	"github.com/b4ckspace/ledboard-v2/config"
 	"github.com/b4ckspace/ledboard-v2/ledboard"
 	"github.com/b4ckspace/ledboard-v2/mqttclient"
 	"github.com/b4ckspace/ledboard-v2/utils"
+
+	"github.com/kelseyhightower/envconfig"
 )
 
+type Config struct {
+	Debug bool `envconfig:"DEBUG"`
+
+	Mode         string `envconfig:"MODE" required:"true"`
+	LedBoardHost string `envconfig:"LEDBOARD_HOST" required:"true"`
+
+	LedBoardPingIntervalSeconds int `envconfig:"LEDBOARD_PING_INTERVAL_SECONDS" required:"true"`
+
+	MqttHost string `envconfig:"MQTT_HOST" required:"true"`
+}
+
 func main() {
-	configPath := flag.String("config", "", "Full path to the configuration JSON file")
-	debug := flag.Bool("debug", false, "Enable debug logging")
-	flag.Parse()
+
+	config := Config{}
+	err := envconfig.Process("", &config)
+	if err != nil {
+		slog.Error("unable to parse environment", "error", err)
+		os.Exit(1)
+	}
 
 	// Set up a default logger
-	var logLevel slog.Level
-	if *debug {
+	logLevel := slog.LevelInfo
+	if config.Debug {
 		logLevel = slog.LevelDebug
-	} else {
-		logLevel = slog.LevelInfo
 	}
 	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
 	slog.SetDefault(slog.New(handler))
 
-	if *configPath == "" {
-		slog.Error("Usage: go run main.go --config <full_path_to_config.json>")
-		os.Exit(1)
-	}
-
-	// Load configuration
-	cfg, err := config.LoadConfig(*configPath)
-	if err != nil {
-		slog.Error("Failed to load configuration", "error", err)
-		os.Exit(1)
-	}
-	slog.Info("Loaded configuration", "config", fmt.Sprintf("%+v", cfg))
-
-	// Initialize LED Board Client (concrete implementation)
-	ledBoardClient := ledboard.NewClient(cfg.LedBoardHost, 9520)
+	// Initialize LED Board Client
+	ledBoardClient := ledboard.NewClient(config.LedBoardHost, 9520)
 
 	// Initialize MQTT Client
 	mqttClient := mqttclient.NewClient()
-	err = mqttClient.Connect(cfg)
+	err = mqttClient.Connect(config.MqttHost)
 	if err != nil {
-		slog.Error("Failed to connect to MQTT broker", "error", err)
+		slog.Error("failed to connect to mqtt broker", "error", err)
 		os.Exit(1)
 	}
-	// Defer mqttClient.Disconnect() is moved to application.go to ensure it's called on graceful shutdown
-
-	// Initialize PingProbe
-	aliveProbe := utils.NewPingProbe(cfg.LedBoardHost, cfg.Ping)
+	defer mqttClient.Disconnect()
 
 	// Set up context for graceful shutdown
 	ctx, cancel := context.WithCancel(context.Background())
-	defer cancel() // Ensure cancel is called when main exits
+	defer cancel()
+
+	// Initialize PingProbe
+	pingProbe, err := utils.NewPingProbe(config.LedBoardHost, config.LedBoardPingIntervalSeconds)
+	if err != nil {
+		slog.Error("unable to start pingprobe", "error", err)
+		os.Exit(1)
+	}
 
 	// Listen for OS signals to gracefully shut down
 	sigChan := make(chan os.Signal, 1)
@@ -69,20 +72,19 @@ func main() {
 
 	go func() {
 		sig := <-sigChan
-		slog.Info("Received signal, shutting down...", "signal", sig)
-		cancel() // Trigger context cancellation
+		slog.Info("received signal, shutting down...", "signal", sig)
+		cancel()
 	}()
 
 	var app *cmd.Application
-	switch cfg.Mode {
+	switch config.Mode {
 	case string(cmd.DefaultMode):
-		app = cmd.NewApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.DefaultMode, ctx)
 	case string(cmd.LasercutterMode):
-		app = cmd.NewApplication(cfg, ledBoardClient, mqttClient, aliveProbe, cmd.LasercutterMode, ctx)
+		app = cmd.NewApplication(ledBoardClient, mqttClient, pingProbe, cmd.Mode(config.Mode))
 	default:
-		slog.Error("Unknown configuration mode", "mode", cfg.Mode)
+		slog.Error("unknown configuration mode", "mode", config.Mode)
 		os.Exit(1)
 	}
 
-	app.Run()
+	app.Run(ctx)
 }

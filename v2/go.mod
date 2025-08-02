@@ -4,6 +4,7 @@ go 1.24.6
 
 require (
 	github.com/eclipse/paho.mqtt.golang v1.5.0
+	github.com/kelseyhightower/envconfig v1.4.0
 	github.com/prometheus-community/pro-bing v0.7.0
 )
 

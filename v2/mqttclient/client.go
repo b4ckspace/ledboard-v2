@@ -6,7 +6,6 @@ import (
 	"time"
 
 	mqtt "github.com/eclipse/paho.mqtt.golang"
-	"github.com/b4ckspace/ledboard-v2/config"
 )
 
 // Client holds the MQTT client instance.
@@ -20,21 +19,21 @@ func NewClient() *Client {
 }
 
 // Connect connects the MQTT client to the broker.
-func (c *Client) Connect(cfg *config.Config) error {
-	opts := mqtt.NewClientOptions().AddBroker(fmt.Sprintf("tcp://%s:1883", cfg.Mqtt.Host)).SetClientID("github.com/b4ckspace/ledboard-v2")
-
+func (c *Client) Connect(host string) error {
+	opts := mqtt.NewClientOptions()
+	opts.AddBroker(fmt.Sprintf("tcp://%s:1883", host))
 	opts.SetKeepAlive(60 * time.Second)
 	opts.SetPingTimeout(1 * time.Second)
 	opts.SetConnectionLostHandler(func(client mqtt.Client, err error) {
-		slog.Warn("MQTT Connection lost", "error", err)
+		slog.Warn("mqtt connection lost", "error", err)
 	})
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
-		slog.Info("MQTT Connected")
+		slog.Info("mqtt connected")
 	})
 
 	c.mqttClient = mqtt.NewClient(opts)
 	if token := c.mqttClient.Connect(); token.Wait() && token.Error() != nil {
-		return fmt.Errorf("failed to connect to MQTT broker: %w", token.Error())
+		return fmt.Errorf("failed to connect to mqtt broker: %w", token.Error())
 	}
 
 	return nil

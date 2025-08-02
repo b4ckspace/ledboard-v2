@@ -9,15 +9,6 @@ import (
 	"github.com/b4ckspace/ledboard-v2/utils"
 )
 
-// LEDBoardClient defines the interface for interacting with the LED board.
-type LEDBoardClient interface {
-	Init() error
-	Send(datagram string)
-	SetDate(date time.Time)
-	SendScreen(screen string)
-	SendScreens(screens []string)
-}
-
 // Client implements the LEDBoardClient interface.
 type Client struct {
 	host string
