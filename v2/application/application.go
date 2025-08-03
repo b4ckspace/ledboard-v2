@@ -57,11 +57,6 @@ func (app *Application) getIdleScreen() string {
 
 // Run runs the application based on the specified mode.
 func (app *Application) Run(ctx context.Context) error {
-	err := app.ledBoardClient.Init()
-	if err != nil {
-		return fmt.Errorf("failed to initialize led board client: %s", err)
-	}
-
 	// Common MQTT subscriptions
 	if err := app.mqttClient.Subscribe("psa/alarm", app.handleMQTTMessage); err != nil {
 		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/alarm", err)
@@ -103,7 +98,7 @@ func (app *Application) Run(ctx context.Context) error {
 		}
 	}
 
-	err = app.pingProbe.Run(ctx, func() {
+	err := app.pingProbe.Run(ctx, func() {
 		slog.Info("ledboard is alive, setting date and sending idle screen")
 		app.ledBoardClient.SetDate(time.Now())
 		app.ledBoardClient.SendScreen(app.getIdleScreen())

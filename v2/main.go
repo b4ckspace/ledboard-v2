@@ -44,7 +44,11 @@ func main() {
 	slog.SetDefault(slog.New(handler))
 
 	// Initialize LED Board Client
-	ledBoardClient := ledboard.NewClient(config.LedBoardHost, 9520)
+	ledBoardClient, err := ledboard.NewClient(config.LedBoardHost, 9520)
+	if err != nil {
+		slog.Error("failed to connect to ledboard", "error", err)
+		os.Exit(1)
+	}
 
 	// Initialize MQTT Client
 	mqttClient := mqttclient.NewClient()

@@ -11,39 +11,26 @@ import (
 
 // Client implements the LEDBoardClient interface.
 type Client struct {
-	host string
-	port int
 	conn *net.UDPConn
 }
 
 // NewClient creates a new LED board client instance.
-func NewClient(host string, port int) *Client {
-	return &Client{host: host, port: port}
-}
-
-// Init initializes the LED board client
-func (c *Client) Init() error {
-	addr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", c.host, c.port))
+func NewClient(host string, port int) (*Client, error) {
+	addr, err := net.ResolveUDPAddr("udp4", fmt.Sprintf("%s:%d", host, port))
 	if err != nil {
-		return fmt.Errorf("failed to resolve UDP address: %w", err)
+		return nil, fmt.Errorf("failed to resolve UDP address: %w", err)
 	}
 
 	conn, err := net.DialUDP("udp4", nil, addr)
 	if err != nil {
-		return fmt.Errorf("failed to dial UDP: %w", err)
+		return nil, fmt.Errorf("failed to dial UDP: %w", err)
 	}
-	c.conn = conn
 	slog.Info("LED Board Client initialized")
-	return nil
+	return &Client{conn}, nil
 }
 
 // Send sends a datagram to the LED board.
 func (c *Client) Send(datagram string) {
-	if c.conn == nil {
-		slog.Warn("UDP connection not initialized, cannot send")
-		return
-	}
-
 	message := []byte(datagram)
 
 	// Debugging: Print the raw datagram being sent
@@ -51,7 +38,7 @@ func (c *Client) Send(datagram string) {
 
 	_, err := c.conn.Write(message)
 	if err != nil {
-		slog.Error("Failed sending UDP message", "error", err)
+		slog.Error("failed sending UDP message", "error", err)
 	}
 }
 
