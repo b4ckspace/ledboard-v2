@@ -1,4 +1,4 @@
-package cmd
+package application
 
 import (
 	"context"
@@ -59,7 +59,7 @@ func (app *Application) getIdleScreen() string {
 func (app *Application) Run(ctx context.Context) error {
 	err := app.ledBoardClient.Init()
 	if err != nil {
-		return fmt.Errorf("Failed to initialize LED board client: %s", err)
+		return fmt.Errorf("failed to initialize led board client: %s", err)
 	}
 
 	// Set time initially
@@ -67,42 +67,42 @@ func (app *Application) Run(ctx context.Context) error {
 
 	// Common MQTT subscriptions
 	if err := app.mqttClient.Subscribe("psa/alarm", app.handleMQTTMessage); err != nil {
-		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/alarm", err)
+		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/alarm", err)
 	}
 	if err := app.mqttClient.Subscribe("psa/pizza", app.handleMQTTMessage); err != nil {
-		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/pizza", err)
+		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/pizza", err)
 	}
 	if err := app.mqttClient.Subscribe("psa/message", app.handleMQTTMessage); err != nil {
-		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/message", err)
+		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/message", err)
 	}
 	if err := app.mqttClient.Subscribe("sensor/door/bell", app.handleMQTTMessage); err != nil {
-		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "sensor/door/bell", err)
+		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "sensor/door/bell", err)
 	}
 	if err := app.mqttClient.Subscribe("sensor/space/member/present", app.handleMQTTMessage); err != nil {
-		return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "sensor/space/member/present", err)
+		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "sensor/space/member/present", err)
 	}
 
 	// Mode-specific MQTT subscriptions
 	switch app.mode {
 	case DefaultMode:
 		if err := app.mqttClient.Subscribe("psa/donation", app.handleMQTTMessage); err != nil {
-			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/donation", err)
+			return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/donation", err)
 		}
 		if err := app.mqttClient.Subscribe("psa/newMember", app.handleMQTTMessage); err != nil {
-			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/newMember", err)
+			return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/newMember", err)
 		}
 		if err := app.mqttClient.Subscribe("psa/nowPlaying", app.handleMQTTMessage); err != nil {
-			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "psa/nowPlaying", err)
+			return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/nowPlaying", err)
 		}
 	case LasercutterMode:
 		if err := app.mqttClient.Subscribe("project/laser/operation", app.handleMQTTMessage); err != nil {
-			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "project/laser/operation", err)
+			return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "project/laser/operation", err)
 		}
 		if err := app.mqttClient.Subscribe("project/laser/finished", app.handleMQTTMessage); err != nil {
-			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "project/laser/finished", err)
+			return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "project/laser/finished", err)
 		}
 		if err := app.mqttClient.Subscribe("project/laser/duration", app.handleMQTTMessage); err != nil {
-			return fmt.Errorf("Failed to subscribe to MQTT topic: %s, %s", "project/laser/duration", err)
+			return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "project/laser/duration", err)
 		}
 	}
 

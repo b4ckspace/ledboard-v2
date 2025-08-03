@@ -7,7 +7,7 @@ import (
 	"os/signal"
 	"syscall"
 
-	"github.com/b4ckspace/ledboard-v2/cmd"
+	"github.com/b4ckspace/ledboard-v2/application"
 	"github.com/b4ckspace/ledboard-v2/ledboard"
 	"github.com/b4ckspace/ledboard-v2/mqttclient"
 	"github.com/b4ckspace/ledboard-v2/utils"
@@ -76,11 +76,11 @@ func main() {
 		cancel()
 	}()
 
-	var app *cmd.Application
+	var app *application.Application
 	switch config.Mode {
-	case string(cmd.DefaultMode):
-	case string(cmd.LasercutterMode):
-		app = cmd.NewApplication(ledBoardClient, mqttClient, pingProbe, cmd.Mode(config.Mode))
+	case string(application.DefaultMode):
+	case string(application.LasercutterMode):
+		app = application.NewApplication(ledBoardClient, mqttClient, pingProbe, application.Mode(config.Mode))
 	default:
 		slog.Error("unknown configuration mode", "mode", config.Mode)
 		os.Exit(1)
