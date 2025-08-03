@@ -62,9 +62,6 @@ func (app *Application) Run(ctx context.Context) error {
 		return fmt.Errorf("failed to initialize led board client: %s", err)
 	}
 
-	// Set time initially
-	app.ledBoardClient.SetDate(time.Now())
-
 	// Common MQTT subscriptions
 	if err := app.mqttClient.Subscribe("psa/alarm", app.handleMQTTMessage); err != nil {
 		return fmt.Errorf("failed to subscribe to MQTT topic: %s, %s", "psa/alarm", err)
