@@ -25,7 +25,7 @@ func (c *Client) Connect(host string) error {
 	opts.SetKeepAlive(60 * time.Second)
 	opts.SetPingTimeout(1 * time.Second)
 	opts.SetConnectionLostHandler(func(client mqtt.Client, err error) {
-		slog.Warn("mqtt connection lost", "error", err)
+		slog.Error("mqtt connection lost", "error", err)
 	})
 	opts.SetOnConnectHandler(func(client mqtt.Client) {
 		slog.Info("mqtt connected")
