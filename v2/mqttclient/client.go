@@ -39,19 +39,6 @@ func (c *Client) Connect(host string) error {
 	return nil
 }
 
-// Publish publishes a message to the specified MQTT topic.
-func (c *Client) Publish(topic string, payload string) {
-	if c.mqttClient == nil || !c.mqttClient.IsConnected() {
-		slog.Warn("MQTT client not connected, cannot publish")
-		return
-	}
-	token := c.mqttClient.Publish(topic, 0, false, payload)
-	token.Wait()
-	if token.Error() != nil {
-		slog.Error("Failed to publish message", "topic", topic, "error", token.Error())
-	}
-}
-
 // Subscribe subscribes to the specified MQTT topic.
 func (c *Client) Subscribe(topic string, handler mqtt.MessageHandler) error {
 	if c.mqttClient == nil || !c.mqttClient.IsConnected() {
