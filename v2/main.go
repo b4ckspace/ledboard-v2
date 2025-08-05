@@ -83,6 +83,7 @@ func main() {
 	var app *application.Application
 	switch config.Mode {
 	case string(application.DefaultMode):
+		fallthrough
 	case string(application.LasercutterMode):
 		app = application.NewApplication(ledBoardClient, mqttClient, pingProbe, application.Mode(config.Mode))
 	default:
