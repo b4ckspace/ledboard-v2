@@ -21,7 +21,7 @@ type Config struct {
 	Mode         string `envconfig:"MODE" required:"true"`
 	LedBoardHost string `envconfig:"LEDBOARD_HOST" required:"true"`
 
-	LedBoardPingIntervalSeconds int `envconfig:"LEDBOARD_PING_INTERVAL_SECONDS" required:"true"`
+	LedBoardPingIntervalSeconds int `envconfig:"LEDBOARD_PING_INTERVAL_SECONDS" default:"5"`
 
 	MqttHost string `envconfig:"MQTT_HOST" required:"true"`
 }
