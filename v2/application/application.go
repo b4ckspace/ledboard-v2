@@ -107,8 +107,9 @@ func (app *Application) Run(ctx context.Context) error {
 		return fmt.Errorf("issues while pinging: %s", err)
 	}
 
+	<-ctx.Done()
 	slog.Info("Application context cancelled. Disconnecting MQTT client.")
-	app.mqttClient.Disconnect() // Disconnect MQTT client gracefully
+	app.mqttClient.Disconnect()
 	return nil
 }
 
