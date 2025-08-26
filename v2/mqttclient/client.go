@@ -42,7 +42,7 @@ func (c *Client) Connect(host string) error {
 // Subscribe subscribes to the specified MQTT topic.
 func (c *Client) Subscribe(topic string, handler mqtt.MessageHandler) error {
 	if c.mqttClient == nil || !c.mqttClient.IsConnected() {
-		return fmt.Errorf("MQTT client not connected, cannot subscribe")
+		return fmt.Errorf("mqtt client not connected, cannot subscribe")
 	}
 	token := c.mqttClient.Subscribe(topic, 0, handler)
 	token.Wait()
@@ -56,6 +56,6 @@ func (c *Client) Subscribe(topic string, handler mqtt.MessageHandler) error {
 func (c *Client) Disconnect() {
 	if c.mqttClient != nil && c.mqttClient.IsConnected() {
 		c.mqttClient.Disconnect(250)
-		slog.Info("MQTT Disconnected")
+		slog.Info("mqtt disconnected")
 	}
 }
