@@ -30,20 +30,22 @@ type Application struct {
 	pingProbe      *utils.PingProbe
 	screens        *screens.Screens
 
-	mode Mode
+	mode     Mode
+	location *time.Location
 
 	memberCount int
 	laserActive bool
 }
 
 // NewApplication creates a new Application.
-func NewApplication(ledBoardClient *ledboard.Client, mqttClient *mqttclient.Client, pingProbe *utils.PingProbe, mode Mode) *Application {
+func NewApplication(ledBoardClient *ledboard.Client, mqttClient *mqttclient.Client, pingProbe *utils.PingProbe, mode Mode, location *time.Location) *Application {
 	return &Application{
 		ledBoardClient: ledBoardClient,
 		mqttClient:     mqttClient,
 		pingProbe:      pingProbe,
 		screens:        screens.NewScreens(),
 		mode:           mode,
+		location:       location,
 	}
 }
 
@@ -100,7 +102,7 @@ func (app *Application) Run(ctx context.Context) error {
 
 	err := app.pingProbe.Run(ctx, func() {
 		slog.Info("ledboard is alive, setting date and sending idle screen")
-		app.ledBoardClient.SetDate(time.Now())
+		app.ledBoardClient.SetDate(time.Now().In(app.location))
 		app.ledBoardClient.SendScreen(app.getIdleScreen())
 	})
 	if err != nil {
@@ -196,7 +198,7 @@ func (app *Application) handleMQTTMessage(client mqttlib.Client, msg mqttlib.Mes
 			app.ledBoardClient.SendScreens([]string{app.screens.LaserFinished(duration), app.getIdleScreen()})
 
 			// Reset datetime to something useful
-			app.ledBoardClient.SetDate(time.Now())
+			app.ledBoardClient.SetDate(time.Now().In(app.location))
 		}
 	}
 }

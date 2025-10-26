@@ -6,6 +6,7 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
+	"time"
 
 	"github.com/b4ckspace/ledboard-v2/application"
 	"github.com/b4ckspace/ledboard-v2/ledboard"
@@ -20,6 +21,7 @@ type Config struct {
 
 	Mode         string `envconfig:"MODE" required:"true"`
 	LedBoardHost string `envconfig:"LEDBOARD_HOST" required:"true"`
+	TimeZome     string `envconfig:"TZ" default:"Europe/Berlin"`
 
 	LedBoardPingIntervalSeconds int `envconfig:"LEDBOARD_PING_INTERVAL_SECONDS" default:"5"`
 
@@ -42,6 +44,13 @@ func main() {
 	}
 	handler := slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: logLevel})
 	slog.SetDefault(slog.New(handler))
+
+	// Load timezone
+	location, err := time.LoadLocation(config.TimeZome)
+	if err != nil {
+		slog.Error("unable to load timezone", "error", err)
+		os.Exit(1)
+	}
 
 	// Initialize LED Board Client
 	ledBoardClient, err := ledboard.NewClient(config.LedBoardHost, 9520)
@@ -85,7 +94,7 @@ func main() {
 	case string(application.DefaultMode):
 		fallthrough
 	case string(application.LasercutterMode):
-		app = application.NewApplication(ledBoardClient, mqttClient, pingProbe, application.Mode(config.Mode))
+		app = application.NewApplication(ledBoardClient, mqttClient, pingProbe, application.Mode(config.Mode), location)
 	default:
 		slog.Error("unknown configuration mode", "mode", config.Mode)
 		os.Exit(1)
