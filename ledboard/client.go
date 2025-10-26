@@ -44,6 +44,7 @@ func (c *Client) Send(datagram string) {
 
 // SetDate sets the date on the LED board.
 func (c *Client) SetDate(date time.Time) {
+	slog.Info("pushing datetime", "time", date)
 	var cmd string
 	cmd += "\x01Z00\x02E"
 	cmd += "B"
