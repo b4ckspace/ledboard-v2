@@ -32,7 +32,9 @@ func (p *PingProbe) Run(ctx context.Context, success func()) error {
 		}
 
 		c, err := net.DialTimeout("tcp", fmt.Sprintf("%s:7", p.host), time.Second)
-		_ = c.Close()
+		if err != nil {
+			_ = c.Close()
+		}
 		last := err == nil
 		history = []bool{history[1], history[2], last}
 
